@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "test1024"
+version = "1.0.0"
+description = "Small client/server deployment exercise for 1024test"
+requires-python = ">=3.10"
+
+[project.scripts]
+1024test = "test1024.cli:main"
+1024test-server = "test1024.server:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

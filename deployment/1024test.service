@@ -1,0 +1,16 @@
+[Unit]
+Description=1024test deployment assessment service
+After=network.target mysql.service
+Requires=mysql.service
+
+[Service]
+Type=simple
+User=REPLACE_WITH_UBUNTU_USERNAME
+WorkingDirectory=/home/test
+ExecStart=/home/test/.venv/bin/1024test-server
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target
