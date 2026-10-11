@@ -32,7 +32,7 @@
 - `.env.example` 已包含端口和账户占位配置；学生须复制为 `.env`，再使用 vim 填写 `DB_PASSWORD`。实际密码只留在 Ubuntu 虚拟机中，`.env` 已列入 `.gitignore`。
 - `schema.sql` 只做建库、建表和一条幂等的初始配置写入，必须由 MySQL root 运行。文件中没有创建 MySQL 用户、设置密码或 `GRANT` 语句；`test` 用户和授权必须由学生手动完成。服务的 `test` 用户不会执行 DDL。
 - `deployment/1024test.service` 中的 `REPLACE_WITH_UBUNTU_USERNAME` 必须替换为实际普通用户。确保该用户能读取 `/home/test/.env` 和项目文件。
-- `requirements.txt` 同时安装 PyMySQL 和本地项目，所以安装后虚拟环境中会有 `1024test`、`1024test-server` 两个命令。
+- `requirements.txt` 同时安装 PyMySQL 和本地项目，所以安装后虚拟环境中会有 `1024test`、`1024test-server` 两个命令。不要使用 `1024test-server --help` 检查安装；服务端命令没有帮助模式，会按配置启动服务。可用 `pip show test1024` 或检查虚拟环境的命令文件确认安装。
 - 推荐创建 PATH 中的启动包装器，内容执行 `/home/test/.venv/bin/1024test "$@"`。如更改了服务端口，再将 `TEST1024_ENV` 指向 `/home/test/.env`。包装器的文件权限应允许普通用户执行。
 
 ## 教师验收要点

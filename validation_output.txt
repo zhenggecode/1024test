@@ -1,0 +1,19 @@
+1024test 本地验证记录
+时间: 2026-10-11 16:02:48
+
+--- compileall ---
+compileall exit: 0
+
+--- unittest ---
+test_deployment_acceptance_flow (test_flow.FlowTests.test_deployment_acceptance_flow) ... ok
+test_duplicate_and_wrong_password (test_flow.FlowTests.test_duplicate_and_wrong_password) ... ok
+test_stopped_service_blocks_version_check (test_flow.FlowTests.test_stopped_service_blocks_version_check) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.004s
+
+OK
+unittest exit: 0
+
+--- VM connectivity ---
+TestNetConnectionResult
