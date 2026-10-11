@@ -32,17 +32,21 @@
 安装完成后确认虚拟环境中已经出现客户端命令和服务端命令。不要把服务端命令当作帮助命令执行；它会按照配置直接启动服务。需要从任意目录执行客户端时，应保持虚拟环境处于激活状态，或按教师要求创建 PATH 中的启动包装器；否则系统可能提示找不到客户端命令。
 ## 5. 前台验证和 systemd
 
-先前台启动服务确认配置可用：
+依赖安装完成并且虚拟环境已经激活后，先运行项目服务端，确认配置和数据库连接可用。Python 项目不需要单独编译，直接运行已安装的项目命令即可：
 
 ```bash
-cd /home/test
-source .venv/bin/activate
 1024test-server
 ```
 
-另开 SSH 窗口执行客户端检查时，也要先激活同一个虚拟环境，或者使用已经配置好的客户端启动包装器。确认服务可访问后，回到服务窗口按 `Ctrl+C`。
+另开 SSH 窗口后，也要先激活同一个虚拟环境，或者使用已经配置好的客户端启动包装器。运行客户端检查服务：
 
-安装 systemd unit：
+```bash
+1024test -v
+```
+
+确认服务可访问后，回到服务窗口按 `Ctrl+C` 停止前台服务。
+
+下面是使用 systemd 设置后台运行和开机自启的完整流程。复制 unit 文件后，编辑其中的普通 Ubuntu 用户名；不能保留 `REPLACE_WITH_UBUNTU_USERNAME`。
 
 ```bash
 sudo cp /home/test/deployment/1024test.service /etc/systemd/system/1024test.service
@@ -55,10 +59,20 @@ systemctl is-active 1024test.service
 sudo systemctl status 1024test.service --no-pager
 ```
 
-vim 中必须把 `User=REPLACE_WITH_UBUNTU_USERNAME` 替换为实际普通用户，并保持 `/home/test` 和 `/home/test/.venv/bin/1024test-server` 路径正确。启动失败时查看：
+编辑 unit 时必须把 `User=REPLACE_WITH_UBUNTU_USERNAME` 替换为实际普通用户，并保持 `/home/test` 和 `/home/test/.venv/bin/1024test-server` 路径正确。启动失败时查看日志：
 
 ```bash
 sudo journalctl -u 1024test.service -n 50 --no-pager
+```
+
+修改 unit 文件后，必须重新加载配置并重启服务：
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl restart 1024test.service
+systemctl is-enabled 1024test.service
+systemctl is-active 1024test.service
+sudo systemctl status 1024test.service --no-pager
 ```
 
 ## 6. 重启和功能验收
@@ -67,11 +81,36 @@ sudo journalctl -u 1024test.service -n 50 --no-pager
 
 进行本节客户端验收前，应先激活 `/home/test/.venv`；如果已经配置了 PATH 启动包装器，可以直接执行客户端命令。systemd 服务使用 unit 文件中的虚拟环境路径，不要求登录 shell 激活虚拟环境。
 
-执行创建用户的功能，使用用户名 `user` 和密码 `123456`。标准输出应为 `true`。随后执行登录功能，看到 `password：` 提示后输入 `123456`，应看到 `logining`。
+执行创建用户和登录功能：
 
-使用 MySQL root 删除刚才创建的 `user` 账户。删除后重启 1024test 服务，再次执行登录功能，应提示 `无该用户`。
+```bash
+1024test -m user 123456
+1024test -l user
+```
 
-停止 1024test 服务，再执行版本检查功能。此时应看到“无法执行”提示，并且程序退出码必须是非零值。验收结束后重新启动服务。
+第二条命令出现 `password：` 提示后输入 `123456`，应看到 `logining`。第一条命令的标准输出应为 `true`。
+
+使用 MySQL root 删除刚才创建的 `user` 账户。删除后重启 1024test 服务，再次运行登录命令：
+
+```bash
+1024test -l user
+```
+
+此时应提示 `无该用户`。
+
+停止 1024test 服务，再执行版本检查功能：
+
+```bash
+sudo systemctl stop 1024test.service
+1024test -v
+```
+
+此时应看到“无法执行”提示，并且程序退出码必须是非零值。验收结束后重新启动服务：
+
+```bash
+sudo systemctl start 1024test.service
+systemctl is-active 1024test.service
+```
 ## 7. 推送自己的仓库
 
 在 Ubuntu 的项目目录中初始化 Git 仓库，查看当前工作区状态，并确认 `.env` 和 `.venv` 已被忽略。然后把项目文件加入提交，填写清晰的提交说明，设置主分支名称，添加自己的 GitHub 或 Gitee 仓库地址，最后推送到远程仓库。
