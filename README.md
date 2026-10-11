@@ -8,13 +8,13 @@
 2. 在 Ubuntu 建立 `/home/test`，将 zip **直接解压到该目录**。验收时应存在 `/home/test/requirements.txt`、`/home/test/.env.example`、`/home/test/schema.sql`，而不是 `/home/test/1024test/` 等额外层级。复制 `.env.example` 为 `.env` 后编辑。
 3. 安装 Python、venv、pip、MySQL、vim 和解压工具。以 MySQL root 身份创建 `1024test` 库、`accounts` 表，以及 MySQL 用户 `test`。该用户对 `1024test` 库**只能拥有 SELECT、INSERT、UPDATE、DELETE 权限**，不能有建表、删表或全局权限。`schema.sql` 给出了库表结构；建用户和授权由学生完成。
 4. 在 `/home/test` 建 Python 虚拟环境，从 `requirements.txt` 安装所有依赖。用 vim 修改 `.env` 中的数据库连接信息。数据库密码不得提交到公开仓库。
-5. 先在前台启动 `1024test-server` 验证可以运行，然后配置 `deployment/1024test.service`，由 systemd 托管、后台持续运行并开机自启。服务应以普通 Ubuntu 用户运行。把虚拟环境中的 `1024test` 命令安装到 PATH，使任何目录都可执行。
+5. 先在前台启动 `1024test-server` 验证可以运行，然后配置 `deployment/1024test.service`，由 systemd 托管、后台持续运行并开机自启。服务应以普通 Ubuntu 用户运行。为客户端创建 PATH 中的启动包装器，使任何目录都可执行；未创建包装器时，验收前先激活 `/home/test/.venv`。
 6. 重启虚拟机后执行下面的功能验收。调试纠错最多 **10 次**，每次修改后重新验证，并在清单记录次数。
 7. 在 Ubuntu 上把项目提交并推送到自己的 GitHub 仓库；访问受限时可用 Gitee。公开仓库中不能包含已填写密码的 `.env`、`.venv`、数据库转储或打包文件，并展示仓库内容。
 
 ## 验收命令与预期
 
-在 Ubuntu 的任意目录执行命令。配置文件由 systemd 服务从 `/home/test/.env` 读取。客户端默认连接本机 8024 端口；若修改了 `APP_PORT`，需设置环境变量 `TEST1024_ENV=/home/test/.env`。
+完成客户端启动包装器后，可在 Ubuntu 的任意目录执行命令；未配置包装器时，先激活 `/home/test/.venv`。配置文件由 systemd 服务从 `/home/test/.env` 读取。客户端默认连接本机 8024 端口；若修改了 `APP_PORT`，需设置环境变量 `TEST1024_ENV=/home/test/.env`。
 
 | 顺序 | 操作 | 预期 |
 | --- | --- | --- |
@@ -32,7 +32,7 @@
 - `.env.example` 已包含端口和账户占位配置；学生须复制为 `.env`，再使用 vim 填写 `DB_PASSWORD`。实际密码只留在 Ubuntu 虚拟机中，`.env` 已列入 `.gitignore`。
 - `schema.sql` 只做建库、建表和一条幂等的初始配置写入，必须由 MySQL root 运行。文件中没有创建 MySQL 用户、设置密码或 `GRANT` 语句；`test` 用户和授权必须由学生手动完成。服务的 `test` 用户不会执行 DDL。
 - `deployment/1024test.service` 中的 `REPLACE_WITH_UBUNTU_USERNAME` 必须替换为实际普通用户。确保该用户能读取 `/home/test/.env` 和项目文件。
-- `requirements.txt` 同时安装 PyMySQL 和本地项目，所以安装后虚拟环境中会有 `1024test`、`1024test-server` 两个命令。不要使用 `1024test-server --help` 检查安装；服务端命令没有帮助模式，会按配置启动服务。可用 `pip show test1024` 或检查虚拟环境的命令文件确认安装。
+- `requirements.txt` 同时安装 PyMySQL、cryptography 和本地项目，所以安装后虚拟环境中会有 `1024test`、`1024test-server` 两个命令。不要使用 `1024test-server --help` 检查安装；服务端命令没有帮助模式，会按配置启动服务。可用 `pip show test1024` 或检查虚拟环境的命令文件确认安装。
 - 推荐创建 PATH 中的启动包装器，内容执行 `/home/test/.venv/bin/1024test "$@"`。如更改了服务端口，再将 `TEST1024_ENV` 指向 `/home/test/.env`。包装器的文件权限应允许普通用户执行。
 
 ## 教师验收要点
