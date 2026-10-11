@@ -1,0 +1,30 @@
+Ubuntu:
+Ubuntu 26.04.1 LTS
+Kernel:
+7.0.0-38-generic
+IP:
+172.19.254.14 
+MySQL:
+active
+Tables:
+accounts
+app_settings
+Grants:
+GRANT USAGE ON *.* TO `test`@`localhost`
+GRANT SELECT, INSERT, UPDATE, DELETE ON `1024test`.* TO `test`@`localhost`
+systemd enabled:
+enabled
+systemd active:
+active
+health:
+running
+stop-test:
+无法执行：1024test 服务未运行或无法连接
+exit:1
+restored:
+active
+--- INTERACTIVE CLI ---
+1024test -m rebootuser 123456 -> true (exit 0)
+1024test -l rebootuser -> password： then logining
+--- REBOOT CHECK ---
+After reboot: systemd enabled, active; 1024test -v -> running (exit 0)
